@@ -28,10 +28,7 @@ public class VideoFilter {
                 int green = c1.getGreen();
                 int blue = c1.getBlue();
                 //Almacena el color en la imagen destino
-                if (property(3, red, green, blue)) {
-                    //System.out.println("Red :"+red+" Blue: "+blue+" Green: "+green);
-                    bi.setRGB(x, y, new Color(red, green, blue).getRGB());
-                } else {
+                if (!property(3, red, green, blue)) {
                     int med = (red + green + blue) / 3;
                     bi.setRGB(x, y, new Color(med, med, med).getRGB());
                 }
