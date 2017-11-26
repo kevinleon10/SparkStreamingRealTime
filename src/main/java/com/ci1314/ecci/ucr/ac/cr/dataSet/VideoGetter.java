@@ -3,47 +3,56 @@ package com.ci1314.ecci.ucr.ac.cr.dataSet;
 import com.ci1314.ecci.ucr.ac.cr.filter.Java2DFrameConverter;
 import com.ci1314.ecci.ucr.ac.cr.filter.VideoFilter;
 import org.bytedeco.javacv.*;
+import org.bytedeco.javacv.Frame;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.List;
 
 
 public class VideoGetter {
 
+    private int color;
+
+    public VideoGetter() {
+        this.color = 3;
+    }
+
     public void getVideo() throws FrameGrabber.Exception {
         CanvasFrame canvas = new CanvasFrame("Video");
-        VideoFilter colorFilter = new VideoFilter();
+        VideoFilter videoFilter = new VideoFilter();
         Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
-        canvas.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+        canvas.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        FrameGrabber g = new OpenCVFrameGrabber(0); // 1 for next camera
-        org.bytedeco.javacv.Frame img;
-        BufferedImage img2;
-        g.start();
+        FrameGrabber frameGrabber = new OpenCVFrameGrabber(0); // 1 for next camera
+        Frame frame;
+        BufferedImage bufferedImage;
+        frameGrabber.start();
 
         while (true) {
 
-            img = g.grab();
+            frame = frameGrabber.grab();
 
-            if (img != null) {
-                img2 = java2DFrameConverter.getBufferedImage(img);
-                //bufferedImageToLine
-                //se manda la vara a spark
-                //lineToBufferedImage
-                img = java2DFrameConverter.getFrame(img2);
-                canvas.showImage(img);
+            if (frame != null) {
+                bufferedImage = java2DFrameConverter.getBufferedImage(frame);
+                List<List> list = this.bufferedImageToLine(bufferedImage);
+                list = videoFilter.applySparkFilter(list, this.color);
+                bufferedImage = lineToBufferedImage(list, bufferedImage);
+                frame = java2DFrameConverter.getFrame(bufferedImage);
+                canvas.showImage(frame);
             }
         }
     }
 
-    public java.util.List<java.util.List> bufferedImageToLine(BufferedImage image) {
+    public List<List> bufferedImageToLine(BufferedImage image) {
 
-        java.util.List<java.util.List> list = new ArrayList<java.util.List>();
+        List<List> list = new ArrayList<>();
 
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
-                java.util.List RGB = new ArrayList<>();
+                List RGB = new ArrayList<>();
                 Color c1 = new Color(image.getRGB(x, y));
                 RGB.add(c1.getRed());
                 RGB.add(c1.getGreen());
@@ -55,11 +64,11 @@ public class VideoGetter {
         return list;
     }
 
-    public BufferedImage lineToBufferedImage(java.util.List<java.util.List> list, BufferedImage image) {
+    public BufferedImage lineToBufferedImage(List<List> list, BufferedImage image) {
         int actualPosition = 0;
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
-                if (list.get(actualPosition).get(3).equals(1)) {
+                if (!list.get(actualPosition).get(3).equals(0)) {
                     image.setRGB(x, y, new Color((int)list.get(actualPosition).get(0), (int)list.get(actualPosition).get(1), (int)list.get(actualPosition).get(2)).getRGB());
                 }
                 actualPosition++;
