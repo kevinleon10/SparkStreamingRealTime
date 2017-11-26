@@ -29,7 +29,8 @@ public class VideoGetter {
 
             if (img != null) {
                 img2 = java2DFrameConverter.getBufferedImage(img);
-                img2 = colorFilter.applyFilter(img2);
+                //img2 = colorFilter.applyFilter(img2);
+                img2 = colorFilter.applySparkFilter(img2, 0);
                 img = java2DFrameConverter.getFrame(img2);
                 canvas.showImage(img);
             }

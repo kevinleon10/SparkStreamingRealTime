@@ -1,22 +1,28 @@
 package com.ci1314.ecci.ucr.ac.cr.filter;
 
 import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
+import scala.Serializable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.*;
+import java.util.List;
 
 /**
  * Created by lskev on 18-Nov-17.
  */
-public class VideoFilter {
+public class VideoFilter implements Serializable {
     private static SparkConf sparkConf;
-    private static SparkContext sparkContext;
+    private static JavaSparkContext javaSparkContext;
 
-    public VideoFilter(){
-        //this.sparkConf = new SparkConf().setAppName("SparkFilter").setMaster("local");
-        //this.sparkContext = new SparkContext(sparkConf);
+    public VideoFilter() {
+        this.sparkConf = new SparkConf().setAppName("SparkFilter").setMaster("local");
+        this.javaSparkContext = new JavaSparkContext(sparkConf);
     }
+
     public BufferedImage applyFilter(BufferedImage bi) {
         //Recorre las imagenes y obtiene el color de la imagen original y la almacena en el destino
         for (int x = 0; x < bi.getWidth(); x++) {
@@ -37,27 +43,75 @@ public class VideoFilter {
         return bi;
     }
 
+    public BufferedImage applySparkFilter(BufferedImage bi, int color) {
+
+        List<List> finalResult = new ArrayList<>();
+        //rgb
+        java.util.List exampleArray = Arrays.asList(3, 1, 2, 0);
+        java.util.List exampleArray1 = Arrays.asList(4, 1, 2, 0);
+        java.util.List exampleArray2 = Arrays.asList(2, 4, 6, 0);
+
+        java.util.List<java.util.List> arrayListList = Arrays.asList(exampleArray, exampleArray1, exampleArray2);
+
+       JavaRDD<List> javaRDD = javaSparkContext.parallelize(arrayListList); //originales
+
+        //revisa a que indice le hace el filtro
+        int firstColor = 1;
+        int secondColor = 2;
+        if (color==1){
+            firstColor = 0;
+        }
+        else if(color==2){
+            secondColor = 0;
+        }
+
+        //Esto es por el compilador
+        int finalFirstColor = firstColor;
+        int finalSecondColor = secondColor;
+
+        //los RDD's filtrados
+        JavaRDD<List> filterRDD = javaRDD.map(new Function<List, List>() {
+            @Override
+            public List call(List list) throws Exception {
+                //Si no es el color del filtro entonces se pone en blanco y negro
+                if((Integer)list.get(color)<=(Integer)list.get(finalFirstColor) || (Integer)list.get(color)<=(Integer)list.get(finalSecondColor)){
+                    int avg = ((Integer)list.get(0) + (Integer)list.get(1) + (Integer)list.get(2)) / 3;
+                    list.set(0, avg);
+                    list.set(1, avg);
+                    list.set(2, avg);
+                    list.set(3, 1);
+                    //System.out.println(avg);
+                }
+                return list;
+            }
+        });
+        finalResult = filterRDD.collect();
+        //Se devuelve la lista modificada
+        //return finalResult
+        return bi;
+    }
+
     private boolean property(int color, int red, int green, int blue) {
         boolean result = false;
         switch (color) {
-            case 1:
-                if (red > blue && red > green) {
-                    result = true;
-                }
-                break;
-            case 2:
-                if (green > blue && green > red) {
-                    result = true;
-                }
-                break;
-            case 3:
-                if (blue > red && blue > green) {
-                    result = true;
-                }
-                break;
-            default:
-                break;
-        }
-        return result;
+        case 1:
+            if (red > blue && red > green) {
+                result = true;
+            }
+            break;
+        case 2:
+            if (green > blue && green > red) {
+                result = true;
+            }
+            break;
+        case 3:
+            if (blue > red && blue > green) {
+                result = true;
+            }
+            break;
+        default:
+            break;
     }
+        return result;
+}
 }
