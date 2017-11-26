@@ -43,15 +43,17 @@ public class VideoFilter implements Serializable {
         return bi;
     }
 
-    public BufferedImage applySparkFilter(BufferedImage bi, int color) {
+    public List<List> applySparkFilter(List<List> arrayListList, int color) {
 
         List<List> finalResult = new ArrayList<>();
+        /*
         //rgb
         java.util.List exampleArray = Arrays.asList(3, 1, 2, 0);
         java.util.List exampleArray1 = Arrays.asList(4, 1, 2, 0);
         java.util.List exampleArray2 = Arrays.asList(2, 4, 6, 0);
 
-        java.util.List<java.util.List> arrayListList = Arrays.asList(exampleArray, exampleArray1, exampleArray2);
+        java.util.List<java.util.List> = Arrays.asList(exampleArray, exampleArray1, exampleArray2);
+        */
 
        JavaRDD<List> javaRDD = javaSparkContext.parallelize(arrayListList); //originales
 
@@ -87,8 +89,7 @@ public class VideoFilter implements Serializable {
         });
         finalResult = filterRDD.collect();
         //Se devuelve la lista modificada
-        //return finalResult
-        return bi;
+        return finalResult;
     }
 
     private boolean property(int color, int red, int green, int blue) {
