@@ -11,9 +11,6 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
-/**
- * Created by lskev on 18-Nov-17.
- */
 public class VideoFilter implements Serializable {
     private static SparkConf sparkConf;
     private static JavaSparkContext javaSparkContext;
@@ -33,6 +30,7 @@ public class VideoFilter implements Serializable {
                 int red = c1.getRed();
                 int green = c1.getGreen();
                 int blue = c1.getBlue();
+
                 //Almacena el color en la imagen destino
                 if (!property(3, red, green, blue)) {
                     int med = (red + green + blue) / 3;
@@ -58,18 +56,18 @@ public class VideoFilter implements Serializable {
        JavaRDD<List> javaRDD = javaSparkContext.parallelize(arrayListList); //originales
 
         //revisa a que indice le hace el filtro
-        int firstColor = 1;
-        int secondColor = 2;
+        int firstExtraColor = 1;
+        int secondExtraColor = 2;
         if (color==1){
-            firstColor = 0;
+            firstExtraColor = 0;
         }
         else if(color==2){
-            secondColor = 0;
+            secondExtraColor = 0;
         }
 
-        //Esto es por el compilador
-        int finalFirstColor = firstColor;
-        int finalSecondColor = secondColor;
+        //Esto es por el compilador, debe ser final
+        int finalFirstColor = firstExtraColor;
+        int finalSecondColor = secondExtraColor;
 
         //los RDD's filtrados
         JavaRDD<List> filterRDD = javaRDD.map(new Function<List, List>() {
@@ -87,9 +85,8 @@ public class VideoFilter implements Serializable {
                 return list;
             }
         });
-        finalResult = filterRDD.collect();
         //Se devuelve la lista modificada
-        return finalResult;
+        return filterRDD.collect();
     }
 
     private boolean property(int color, int red, int green, int blue) {
