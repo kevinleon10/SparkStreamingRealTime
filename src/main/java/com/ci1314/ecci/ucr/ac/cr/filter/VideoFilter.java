@@ -8,7 +8,6 @@ import scala.Serializable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
 import java.util.List;
 
 public class VideoFilter implements Serializable {
@@ -18,6 +17,53 @@ public class VideoFilter implements Serializable {
     public VideoFilter() {
         this.sparkConf = new SparkConf().setAppName("SparkFilter").setMaster("local");
         this.javaSparkContext = new JavaSparkContext(sparkConf);
+    }
+
+    public List<List> applySparkFilter(List<List> arrayListList, int color) {
+
+        //List<List> finalResult = new ArrayList<>();
+        /*
+        //rgb
+        java.util.List exampleArray = Arrays.asList(3, 1, 2, 0);
+        java.util.List exampleArray1 = Arrays.asList(4, 1, 2, 0);
+        java.util.List exampleArray2 = Arrays.asList(2, 4, 6, 0);
+
+        java.util.List<java.util.List> = Arrays.asList(exampleArray, exampleArray1, exampleArray2);
+        */
+
+        JavaRDD<List> javaRDD = javaSparkContext.parallelize(arrayListList); //originales
+
+        //revisa a que indice le hace el filtro
+        int firstExtraColor = 1;
+        int secondExtraColor = 2;
+        if (color == 1) {
+            firstExtraColor = 0;
+        } else if (color == 2) {
+            secondExtraColor = 0;
+        }
+
+        //Esto es por el compilador, debe ser final
+        int finalFirstColor = firstExtraColor;
+        int finalSecondColor = secondExtraColor;
+
+        //los RDD's filtrados
+        JavaRDD<List> filterRDD = javaRDD.map(new Function<List, List>() {
+            @Override
+            public List call(List list) throws Exception {
+                //Si no es el color del filtro entonces se pone en blanco y negro
+                if ((Integer) list.get(color) <= (Integer) list.get(finalFirstColor) || (Integer) list.get(color) <= (Integer) list.get(finalSecondColor)) {
+                    int avg = ((Integer) list.get(0) + (Integer) list.get(1) + (Integer) list.get(2)) / 3;
+                    list.set(0, avg);
+                    list.set(1, avg);
+                    list.set(2, avg);
+                    list.set(3, 1);
+                    //System.out.println(avg);
+                }
+                return list;
+            }
+        });
+        //Se devuelve la lista modificada
+        return filterRDD.collect();
     }
 
     public BufferedImage applyFilter(BufferedImage bi, int color) {
@@ -41,76 +87,28 @@ public class VideoFilter implements Serializable {
         return bi;
     }
 
-    public List<List> applySparkFilter(List<List> arrayListList, int color) {
-
-        List<List> finalResult = new ArrayList<>();
-        /*
-        //rgb
-        java.util.List exampleArray = Arrays.asList(3, 1, 2, 0);
-        java.util.List exampleArray1 = Arrays.asList(4, 1, 2, 0);
-        java.util.List exampleArray2 = Arrays.asList(2, 4, 6, 0);
-
-        java.util.List<java.util.List> = Arrays.asList(exampleArray, exampleArray1, exampleArray2);
-        */
-
-       JavaRDD<List> javaRDD = javaSparkContext.parallelize(arrayListList); //originales
-
-        //revisa a que indice le hace el filtro
-        int firstExtraColor = 1;
-        int secondExtraColor = 2;
-        if (color==1){
-            firstExtraColor = 0;
-        }
-        else if(color==2){
-            secondExtraColor = 0;
-        }
-
-        //Esto es por el compilador, debe ser final
-        int finalFirstColor = firstExtraColor;
-        int finalSecondColor = secondExtraColor;
-
-        //los RDD's filtrados
-        JavaRDD<List> filterRDD = javaRDD.map(new Function<List, List>() {
-            @Override
-            public List call(List list) throws Exception {
-                //Si no es el color del filtro entonces se pone en blanco y negro
-                if((Integer)list.get(color)<=(Integer)list.get(finalFirstColor) || (Integer)list.get(color)<=(Integer)list.get(finalSecondColor)){
-                    int avg = ((Integer)list.get(0) + (Integer)list.get(1) + (Integer)list.get(2)) / 3;
-                    list.set(0, avg);
-                    list.set(1, avg);
-                    list.set(2, avg);
-                    list.set(3, 1);
-                    //System.out.println(avg);
-                }
-                return list;
-            }
-        });
-        //Se devuelve la lista modificada
-        return filterRDD.collect();
-    }
-
     private boolean property(int color, int red, int green, int blue) {
         boolean result = false;
         switch (color) {
-        case 1:
-            if (red > blue && red > green) {
+            case 1:
+                if (red > blue && red > green) {
+                    result = true;
+                }
+                break;
+            case 2:
+                if (green > blue && green > red) {
+                    result = true;
+                }
+                break;
+            case 3:
+                if (blue > red && blue > green) {
+                    result = true;
+                }
+                break;
+            default:
                 result = true;
-            }
-            break;
-        case 2:
-            if (green > blue && green > red) {
-                result = true;
-            }
-            break;
-        case 3:
-            if (blue > red && blue > green) {
-                result = true;
-            }
-            break;
-        default:
-            result = true;
-            break;
-    }
+                break;
+        }
         return result;
-}
+    }
 }
