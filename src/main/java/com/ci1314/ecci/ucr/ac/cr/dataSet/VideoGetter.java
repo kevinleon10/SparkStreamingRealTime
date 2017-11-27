@@ -36,7 +36,8 @@ public class VideoGetter {
         this.canvas.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
-                int option = JOptionPane.showConfirmDialog(null, "¿Surely you want to exit the application?", "Spark Streaming Real Time", 2, -1, null);
+                String[] options = {"Yes", "No"};
+                int option = JOptionPane.showOptionDialog(null, "    ¿Sure you want to exit the application?", "Spark Streaming Real Time", JOptionPane.DEFAULT_OPTION, -1, null, options, options[0]);
                 if (option == 0) {
                     e.getWindow().dispose();
                     active = false;
@@ -50,8 +51,11 @@ public class VideoGetter {
         this.greenButton = new JButton("Green Filter");
         this.blueButton = new JButton("Blue Filter");
         this.buttonPanel.add(this.normalButton);
+        this.buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
         this.buttonPanel.add(this.redButton);
+        this.buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
         this.buttonPanel.add(this.greenButton);
+        this.buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
         this.buttonPanel.add(this.blueButton);
 
         this.canvas.add(this.buttonPanel, BorderLayout.SOUTH);
