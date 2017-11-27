@@ -88,13 +88,14 @@ public class VideoGetter {
         frame = frameGrabber.grab();
 
         while (frame != null) {
-            // hacer un if, de que si color==0, entonces no haga ningún cambio
-            bufferedImage = java2DFrameConverter.getBufferedImage(frame);
-            //List<List> list = this.bufferedImageToLine(bufferedImage);
-            //list = videoFilter.applySparkFilter(list, this.color);
-            //bufferedImage = lineToBufferedImage(list, bufferedImage);
-            bufferedImage = videoFilter.applyFilter(bufferedImage, this.color);
-            frame = java2DFrameConverter.getFrame(bufferedImage);
+            if (this.color > 0) {
+                bufferedImage = java2DFrameConverter.getBufferedImage(frame);
+                //List<List> list = this.bufferedImageToLine(bufferedImage);
+                //list = videoFilter.applySparkFilter(list, this.color);
+                //bufferedImage = lineToBufferedImage(list, bufferedImage);
+                bufferedImage = videoFilter.applyFilter(bufferedImage, this.color);
+                frame = java2DFrameConverter.getFrame(bufferedImage);
+            }
             canvas.showImage(frame);
             frame = frameGrabber.grab();
         }
