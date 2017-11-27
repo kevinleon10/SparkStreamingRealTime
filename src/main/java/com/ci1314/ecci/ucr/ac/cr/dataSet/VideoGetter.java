@@ -16,6 +16,7 @@ import java.util.List;
 public class VideoGetter {
 
     private int color;
+    private boolean active;
     private CanvasFrame canvas;
     private JPanel buttonPanel;
     private JButton normalButton;
@@ -25,17 +26,21 @@ public class VideoGetter {
 
     public VideoGetter() {
         this.color = 0;
+        this.active = true;
         this.initCanvas();
     }
 
-    private void initCanvas(){
+    private void initCanvas() {
         this.canvas = new CanvasFrame("Spark Streaming Real Time");
-        canvas.addWindowListener(new java.awt.event.WindowAdapter()
-        {
+        this.canvas.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.canvas.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent e)
-            {
-                System.exit(0);
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                int option = JOptionPane.showConfirmDialog(null, "¿Surely you want to exit the application?", "Spark Streaming Real Time", 2, -1, null);
+                if (option == 0) {
+                    e.getWindow().dispose();
+                    active = false;
+                }
             }
         });
 
@@ -87,7 +92,8 @@ public class VideoGetter {
         frameGrabber.start();
         frame = frameGrabber.grab();
 
-        while (frame != null) {
+        while (active) {
+            frame = frameGrabber.grab();
             if (this.color > 0) {
                 bufferedImage = java2DFrameConverter.getBufferedImage(frame);
                 //List<List> list = this.bufferedImageToLine(bufferedImage);
@@ -97,7 +103,6 @@ public class VideoGetter {
                 frame = java2DFrameConverter.getFrame(bufferedImage);
             }
             canvas.showImage(frame);
-            frame = frameGrabber.grab();
         }
         frameGrabber.close();
     }
