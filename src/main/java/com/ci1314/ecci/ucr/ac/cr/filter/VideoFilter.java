@@ -20,7 +20,7 @@ public class VideoFilter implements Serializable {
         this.javaSparkContext = new JavaSparkContext(sparkConf);
     }
 
-    public BufferedImage applyFilter(BufferedImage bi) {
+    public BufferedImage applyFilter(BufferedImage bi, int color) {
         //Recorre las imagenes y obtiene el color de la imagen original y la almacena en el destino
         for (int x = 0; x < bi.getWidth(); x++) {
             for (int y = 0; y < bi.getHeight(); y++) {
@@ -32,7 +32,7 @@ public class VideoFilter implements Serializable {
                 int blue = c1.getBlue();
 
                 //Almacena el color en la imagen destino
-                if (!property(3, red, green, blue)) {
+                if (!property(color, red, green, blue)) {
                     int med = (red + green + blue) / 3;
                     bi.setRGB(x, y, new Color(med, med, med).getRGB());
                 }
@@ -108,6 +108,7 @@ public class VideoFilter implements Serializable {
             }
             break;
         default:
+            result = true;
             break;
     }
         return result;

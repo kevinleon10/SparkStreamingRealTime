@@ -7,6 +7,8 @@ import org.bytedeco.javacv.Frame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
@@ -14,17 +16,20 @@ import java.util.List;
 public class VideoGetter {
 
     private int color;
+    private CanvasFrame canvas;
+    private JPanel buttonPanel;
+    private JButton normalButton;
+    private JButton redButton;
+    private JButton greenButton;
+    private JButton blueButton;
 
     public VideoGetter() {
-        this.color = 3;
+        this.color = 0;
+        this.initCanvas();
     }
 
-    public void getVideo() throws FrameGrabber.Exception {
-        CanvasFrame canvas = new CanvasFrame("Spark Streaming Real Time");
-        VideoFilter videoFilter = new VideoFilter();
-        Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
-        canvas.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+    private void initCanvas(){
+        this.canvas = new CanvasFrame("Spark Streaming Real Time");
         canvas.addWindowListener(new java.awt.event.WindowAdapter()
         {
             @Override
@@ -34,6 +39,48 @@ public class VideoGetter {
             }
         });
 
+        this.buttonPanel = new JPanel();
+        this.normalButton = new JButton("No Filter");
+        this.redButton = new JButton("Red Filter");
+        this.greenButton = new JButton("Green Filter");
+        this.blueButton = new JButton("Blue Filter");
+        this.buttonPanel.add(normalButton);
+        this.buttonPanel.add(redButton);
+        this.buttonPanel.add(greenButton);
+        this.buttonPanel.add(blueButton);
+
+        this.canvas.add(buttonPanel, BorderLayout.SOUTH);
+
+        this.normalButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setColor(0);
+            }
+        });
+        this.redButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setColor(1);
+            }
+        });
+        this.greenButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setColor(2);
+            }
+        });
+        this.blueButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setColor(3);
+            }
+        });
+    }
+
+    public void getVideo() throws FrameGrabber.Exception {
+
+        VideoFilter videoFilter = new VideoFilter();
+        Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
         FrameGrabber frameGrabber = new OpenCVFrameGrabber(0); // 1 for next camera
         Frame frame;
         BufferedImage bufferedImage;
@@ -41,10 +88,12 @@ public class VideoGetter {
         frame = frameGrabber.grab();
 
         while (frame != null) {
+            // hacer un if, de que si color==0, entonces no haga ningún cambio
             bufferedImage = java2DFrameConverter.getBufferedImage(frame);
-            List<List> list = this.bufferedImageToLine(bufferedImage);
-            list = videoFilter.applySparkFilter(list, this.color);
-            bufferedImage = lineToBufferedImage(list, bufferedImage);
+            //List<List> list = this.bufferedImageToLine(bufferedImage);
+            //list = videoFilter.applySparkFilter(list, this.color);
+            //bufferedImage = lineToBufferedImage(list, bufferedImage);
+            bufferedImage = videoFilter.applyFilter(bufferedImage, this.color);
             frame = java2DFrameConverter.getFrame(bufferedImage);
             canvas.showImage(frame);
             frame = frameGrabber.grab();
