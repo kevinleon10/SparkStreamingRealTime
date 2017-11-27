@@ -49,12 +49,12 @@ public class VideoGetter {
         this.redButton = new JButton("Red Filter");
         this.greenButton = new JButton("Green Filter");
         this.blueButton = new JButton("Blue Filter");
-        this.buttonPanel.add(normalButton);
-        this.buttonPanel.add(redButton);
-        this.buttonPanel.add(greenButton);
-        this.buttonPanel.add(blueButton);
+        this.buttonPanel.add(this.normalButton);
+        this.buttonPanel.add(this.redButton);
+        this.buttonPanel.add(this.greenButton);
+        this.buttonPanel.add(this.blueButton);
 
-        this.canvas.add(buttonPanel, BorderLayout.SOUTH);
+        this.canvas.add(this.buttonPanel, BorderLayout.SOUTH);
 
         this.normalButton.addActionListener(new ActionListener() {
             @Override
