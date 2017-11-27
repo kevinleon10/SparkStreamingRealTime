@@ -47,15 +47,19 @@ public class VideoGetter {
 
         this.buttonPanel = new JPanel();
         this.normalButton = new JButton("No Filter");
+        this.normalButton.setBackground(new Color(255, 255, 255));
         this.redButton = new JButton("Red Filter");
+        this.redButton.setBackground(new Color(250, 153, 153));
         this.greenButton = new JButton("Green Filter");
+        this.greenButton.setBackground(new Color(153, 250, 153));
         this.blueButton = new JButton("Blue Filter");
+        this.blueButton.setBackground(new Color(153, 153, 250));
         this.buttonPanel.add(this.normalButton);
-        this.buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
+        this.buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         this.buttonPanel.add(this.redButton);
-        this.buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
+        this.buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         this.buttonPanel.add(this.greenButton);
-        this.buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
+        this.buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         this.buttonPanel.add(this.blueButton);
 
         this.canvas.add(this.buttonPanel, BorderLayout.SOUTH);
